@@ -66,6 +66,7 @@ static const PWMConfig heaterPwmConfig = {
 
 static constexpr int preheatTimeCounter = HEATER_PREHEAT_TIME / HEATER_CONTROL_PERIOD;
 static constexpr int batteryStabTimeCounter = HEATER_BATTERY_STAB_TIME / HEATER_CONTROL_PERIOD;
+static constexpr int closedLoopStabTimeCounter = HEATER_CLOSED_LOOP_STAB_TIME / HEATER_CONTROL_PERIOD;
 static const struct sensorHeaterParams *heater;
 
 struct heater_state {
@@ -172,6 +173,7 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
         case HeaterState::WarmupRamp:
             if (sensorTemp > closedLoopTemp)
             {
+                s.timeCounter = closedLoopStabTimeCounter;
                 return HeaterState::ClosedLoop;
             }
             else if (s.timeCounter == 0)
@@ -184,16 +186,23 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
 
             break;
         case HeaterState::ClosedLoop:
-            // Check that the sensor's ESR is acceptable for normal operation
-            if (sensorTemp > overheatTemp)
-            {
-                SetFault(s.ch, Fault::SensorOverheat);
-                return HeaterState::Stopped;
-            }
-            else if (sensorTemp < underheatTemp)
-            {
-                SetFault(s.ch, Fault::SensorUnderheat);
-                return HeaterState::Stopped;
+            if (s.timeCounter > 0) {
+                // give some time for stabilization...
+                // looks like heavy ramped Ipump affects sensorEsr measure
+                // and right after switch to closed loop sensorEsr rises above underhead threshold
+                s.timeCounter--;
+            } else {
+                // Check that the sensor's ESR is acceptable for normal operation
+                if (sensorTemp > overheatTemp)
+                {
+                    SetFault(s.ch, Fault::SensorOverheat);
+                    return HeaterState::Stopped;
+                }
+                else if (sensorTemp < underheatTemp)
+                {
+                    SetFault(s.ch, Fault::SensorUnderheat);
+                    return HeaterState::Stopped;
+                }
             }
 
             break;
