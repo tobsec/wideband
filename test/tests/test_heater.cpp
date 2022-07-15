@@ -128,6 +128,9 @@ TEST(HeaterStateMachine, ClosedLoop)
     // Temperature is reasonable, stay in closed loop
     EXPECT_EQ(HeaterState::ClosedLoop, dut.GetNextState(HeaterState::ClosedLoop, HeaterAllow::Allowed, 12, 780));
 
+    // Skip 5 sec stabilizaiton time
+    Timer::setMockTime(5.1e6);
+
     // Temperature is too hot, overheat
     EXPECT_EQ(HeaterState::Stopped, dut.GetNextState(HeaterState::ClosedLoop, HeaterAllow::Allowed, 12, 1000));
 
