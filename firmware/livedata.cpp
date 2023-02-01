@@ -22,6 +22,7 @@ void SamplingUpdateLiveData()
 
         data->lambda = GetLambda(ch);
         data->temperature = GetSensorTemperature(ch) * 10;
+        data->heaterSupplyVoltage = GetInternalBatteryVoltage(ch) * 100;
         data->nernstDc = GetNernstDc(ch) * 1000;
         data->nernstAc = GetNernstAc(ch) * 1000;
         data->pumpCurrentTarget = GetPumpCurrent(ch);
