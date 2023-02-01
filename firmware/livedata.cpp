@@ -20,11 +20,12 @@ void SamplingUpdateLiveData()
     for (int ch = 0; ch < AFR_CHANNELS; ch++)
     {
         volatile struct livedata_afr_s *data = &livedata_afr[ch];
+        float voltage = GetInternalBatteryVoltage(ch);
 
         data->lambda = GetLambda(ch);
         data->temperature = GetSensorTemperature(ch) * 10;
-        data->nernstDc = GetNernstDc(ch) * 1000;
-        data->nernstAc = GetNernstAc(ch) * 1000;
+        data->heaterSupplyVoltage = voltage * 100;
+        data->nernstVoltage = GetNernstDc(ch);
         data->pumpCurrentTarget = GetPumpCurrent(ch);
         data->pumpCurrentMeasured = GetPumpNominalCurrent(ch);
         data->heaterDuty = GetHeaterDuty(ch) * 1000;    // 0.1 %
@@ -33,8 +34,8 @@ void SamplingUpdateLiveData()
         data->fault = (uint8_t)GetCurrentFault(ch);
         data->heaterState = (uint8_t)GetHeaterState(ch);
         /* TODO: add GetPumpOutputDuty() */
-        if (GetInternalBatteryVoltage(ch) > vbat)
-            vbat = GetInternalBatteryVoltage(ch);
+        if (voltage > vbat)
+            vbat = voltage;
     }
 
     livedata_common.vbatt = vbat;
