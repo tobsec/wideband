@@ -32,6 +32,7 @@ void SamplingUpdateLiveData()
         data->esr = GetSensorInternalResistance(ch);
         data->fault = (uint8_t)GetCurrentFault(ch);
         data->heaterState = (uint8_t)GetHeaterState(ch);
+        /* TODO: add GetPumpOutputDuty() */
         if (GetInternalBatteryVoltage(ch) > vbat)
             vbat = GetInternalBatteryVoltage(ch);
     }
