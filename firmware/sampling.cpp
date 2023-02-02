@@ -17,6 +17,7 @@ struct measure_results {
     float nernstDc;
     float pumpCurrentSenseVoltage;
     float internalBatteryVoltage;
+    int clamped;
 };
 
 static struct measure_results results[AFR_CHANNELS];
@@ -60,6 +61,14 @@ static void SamplingThread(void*)
         for (int ch = 0; ch < AFR_CHANNELS; ch++) {
             measure_results &res = results[ch];
             float r_1 = result.ch[ch].NernstVoltage;
+
+            // If value is close to ADC limit...
+            if (r_1 > 3.2 * NERNST_INPUT_GAIN) {
+                res.clamped = 100;
+            }
+
+            if (res.clamped)
+                res.clamped--;
 
             // r2_opposite_phase estimates where the previous sample would be had we not been toggling
             // AKA the absolute value of the difference between r2_opposite_phase and r2 is the amplitude
@@ -110,6 +119,13 @@ float GetNernstAc(int ch)
 
 float GetSensorInternalResistance(int ch)
 {
+    if (results[ch].clamped)
+    {
+        // TODO: report disconnected error?
+        // Return some non-realistic value
+        return 10000;
+    }
+
     // Sensor is the lowside of a divider, top side is GetESRSupplyR(), and 3.3v AC pk-pk is injected
     float totalEsr = GetESRSupplyR() / (VCC_VOLTS / GetNernstAc(ch) - 1);
 
