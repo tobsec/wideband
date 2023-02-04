@@ -67,6 +67,12 @@ static const PWMConfig heaterPwmConfig = {
 static constexpr int preheatTimeCounter = HEATER_PREHEAT_TIME / HEATER_CONTROL_PERIOD;
 static constexpr int batteryStabTimeCounter = HEATER_BATTERY_STAB_TIME / HEATER_CONTROL_PERIOD;
 static constexpr int closedLoopStabTimeCounter = HEATER_CLOSED_LOOP_STAB_TIME / HEATER_CONTROL_PERIOD;
+static constexpr int heaterWarmUpTimeCounter = HEATER_WARMUP_TIMEOUT / HEATER_CONTROL_PERIOD;
+// Retry timeouts
+static constexpr int didntHeatTimeCounter = HEATER_DIDNOTHEAT_RETRY_TIMEOUT / HEATER_CONTROL_PERIOD;
+static constexpr int overheatTimeCounter = HEATER_OVERHEAT_RETRY_TIMEOUT / HEATER_CONTROL_PERIOD;
+static constexpr int underheatTimeCounter = HEATER_UNDERHEAT_RETRY_TIMEOUT / HEATER_CONTROL_PERIOD;
+
 static const struct sensorHeaterParams *heater;
 
 struct heater_state {
@@ -164,7 +170,7 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
                 s.rampVoltage = 4;
 
                 // Next phase times out at 15 seconds
-                s.timeCounter = HEATER_WARMUP_TIMEOUT / HEATER_CONTROL_PERIOD;
+                s.timeCounter = heaterWarmUpTimeCounter;
 
                 return HeaterState::WarmupRamp;
             }
@@ -180,6 +186,10 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
             else if (s.timeCounter == 0)
             {
                 SetFault(s.ch, Fault::SensorDidntHeat);
+
+                // retry after timeout
+                s.timeCounter = didntHeatTimeCounter;
+
                 return HeaterState::Stopped;
             }
 
@@ -197,17 +207,37 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
                 if (sensorTemp > overheatTemp)
                 {
                     SetFault(s.ch, Fault::SensorOverheat);
+
+                    // retry after timeout
+                    s.timeCounter = overheatTimeCounter;
+
                     return HeaterState::Stopped;
                 }
                 else if (sensorTemp < underheatTemp)
                 {
                     SetFault(s.ch, Fault::SensorUnderheat);
+
+                    // retry after timeout
+                    s.timeCounter = underheatTimeCounter;
+
                     return HeaterState::Stopped;
                 }
+
+                // reset fault
+                SetFault(s.ch, Fault::None);
             }
 
             break;
         case HeaterState::Stopped:
+            if (s.timeCounter > 0) {
+                s.timeCounter--;
+
+                if (s.timeCounter == 0) {
+                    s.timeCounter = preheatTimeCounter;
+                    return HeaterState::Preheat;
+                }
+            }
+            break;
         case HeaterState::NoHeaterSupply:
             /* nop */
             break;
