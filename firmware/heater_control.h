@@ -70,10 +70,13 @@ private:
     const int m_preheatTimeSec;
     const int m_warmupTimeSec;
 
+    int m_retryTime = 0;
+
     Timer m_batteryStableTimer;
     Timer m_preheatTimer;
     Timer m_warmupTimer;
     Timer m_closedLoopStableTimer;
+    Timer m_retryTimer;
 
     static const int batteryStabTimeCounter = HEATER_BATTERY_STAB_TIME / HEATER_CONTROL_PERIOD;
 };
