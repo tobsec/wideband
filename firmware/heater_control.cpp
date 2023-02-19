@@ -49,6 +49,8 @@ HeaterState HeaterControllerBase::GetNextState(HeaterState currentState, HeaterA
         if (batteryVoltage < HEATER_BATTETY_OFF_VOLTAGE)
         {
             m_batteryStableTimer.reset();
+            // set fault
+            SetFault(ch, Fault::SensorNoHeatSupply);
             return HeaterState::NoHeaterSupply;
         }
         else if (batteryVoltage > HEATER_BATTERY_ON_VOLTAGE)
