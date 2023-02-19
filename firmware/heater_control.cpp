@@ -136,6 +136,10 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
         if (batteryVoltage < HEATER_BATTETY_OFF_VOLTAGE)
         {
             s.batteryStabTime = batteryStabTimeCounter;
+
+            // set fault
+            SetFault(s.ch, Fault::SensorNoHeatSupply);
+
             return HeaterState::NoHeaterSupply;
         }
         // measured voltage is high enougth to auto-start heating, wait some time to stabilize
@@ -222,10 +226,9 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
 
                     return HeaterState::Stopped;
                 }
-
-                // reset fault
-                SetFault(s.ch, Fault::None);
             }
+            // reset fault
+            SetFault(s.ch, Fault::None);
 
             break;
         case HeaterState::Stopped:
