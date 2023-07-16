@@ -16,7 +16,6 @@ static livedata_afr_s livedata_afr[AFR_CHANNELS];
 
 void SamplingUpdateLiveData()
 {
-    float vbat = 0;
     for (int ch = 0; ch < AFR_CHANNELS; ch++)
     {
         volatile struct livedata_afr_s *data = &livedata_afr[ch];
@@ -35,12 +34,9 @@ void SamplingUpdateLiveData()
         data->esr = GetSensorInternalResistance(ch);
         data->fault = (uint8_t)GetCurrentFault(ch);
         data->heaterState = (uint8_t)GetHeaterState(ch);
-        /* TODO: add GetPumpOutputDuty() */
-        if (voltage > vbat)
-            vbat = voltage;
     }
-
-    livedata_common.vbatt = vbat;
+extern float batteryVoltage;
+    livedata_common.vbatt = batteryVoltage;
 }
 
 template<>

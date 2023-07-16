@@ -284,6 +284,8 @@ static float GetVoltageForState(struct heater_state &s, float heaterEsr)
     return 0;
 }
 
+float batteryVoltage;
+
 static THD_WORKING_AREA(waHeaterThread, 256);
 static void HeaterThread(void*)
 {
@@ -311,7 +313,7 @@ static void HeaterThread(void*)
 
             // If we haven't heard from rusEFI, use the internally sensed 
             // battery voltage instead of voltage over CAN.
-            float batteryVoltage = heaterAllowState == HeaterAllow::Unknown
+            batteryVoltage = heaterAllowState == HeaterAllow::Unknown
                                         ? GetInternalBatteryVoltage(s.ch)
                                         : GetRemoteBatteryVoltage();
 
