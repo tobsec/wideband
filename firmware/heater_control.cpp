@@ -166,6 +166,18 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
         case HeaterState::Preheat:
             s.timeCounter--;
 
+            #ifdef HEATER_FAST_HEATING_THRESHOLD_T
+            if (sensorTemp >= HEATER_FAST_HEATING_THRESHOLD_T) {
+                // if sensor is already hot - we can start from higher heater voltage
+                s.rampVoltage = 7.5;
+
+                // Next phase times out at 15 seconds
+                s.timeCounter = heaterWarmUpTimeCounter;
+
+                return HeaterState::WarmupRamp;
+            }
+            #endif
+
             // If preheat timeout, or sensor is already hot (engine running?)
             if (s.timeCounter <= 0 || sensorTemp > closedLoopTemp)
             {
