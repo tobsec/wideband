@@ -72,7 +72,7 @@ private:
 
     int m_retryTime;
 
-    Timer m_batteryStableTimer;
+    Timer m_heaterStableTimer;
     Timer m_preheatTimer;
     Timer m_warmupTimer;
     Timer m_closedLoopStableTimer;
