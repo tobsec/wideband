@@ -17,7 +17,7 @@ struct measure_results {
     float nernstDc;
     float nernstV;
     float pumpCurrentSenseVoltage;
-    float internalBatteryVoltage;
+    float internalHeaterVoltage;
     int clamped;
 };
 
@@ -93,7 +93,7 @@ static void SamplingThread(void*)
                 PUMP_FILTER_ALPHA * (result.ch[ch].PumpCurrentVoltage - result.VirtualGroundVoltageInt);
 
             #ifdef BATTERY_INPUT_DIVIDER
-                res.internalBatteryVoltage = result.ch[ch].BatteryVoltage;
+                res.internalHeaterVoltage = result.ch[ch].BatteryVoltage;
             #endif
 
             // Shift history over by one
@@ -176,10 +176,9 @@ float GetPumpNominalCurrent(int ch)
     return results[ch].pumpCurrentSenseVoltage * ratio;
 }
 
-float GetInternalBatteryVoltage(int ch)
+float GetInternalHeaterVoltage(int ch)
 {
     // Dual HW can measure heater voltage for each channel
     // by measuring voltage on Heater- while FET is off
-    // TODO: rename function?
-    return results[ch].internalBatteryVoltage;
+    return results[ch].internalHeaterVoltage;
 }

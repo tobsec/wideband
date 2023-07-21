@@ -312,7 +312,7 @@ static void HeaterThread(void*)
             // If we haven't heard from rusEFI, use the internally sensed 
             // battery voltage instead of voltage over CAN.
             float batteryVoltage = heaterAllowState == HeaterAllow::Unknown
-                                        ? GetInternalBatteryVoltage(s.ch)
+                                        ? GetInternalHeaterVoltage(s.ch)
                                         : GetRemoteBatteryVoltage();
 
             // Run the state machine

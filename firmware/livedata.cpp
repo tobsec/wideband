@@ -20,7 +20,7 @@ void SamplingUpdateLiveData()
     for (int ch = 0; ch < AFR_CHANNELS; ch++)
     {
         volatile struct livedata_afr_s *data = &livedata_afr[ch];
-        float voltage = GetInternalBatteryVoltage(ch);
+        float voltage = GetInternalHeaterVoltage(ch);
 
         data->lambda = GetLambda(ch);
         data->temperature = GetSensorTemperature(ch) * 10;

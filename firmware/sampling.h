@@ -8,4 +8,4 @@ float GetSensorTemperature(int ch);
 float GetNernstDc(int ch);
 float GetNernstV(int ch);
 float GetPumpNominalCurrent(int ch);
-float GetInternalBatteryVoltage(int ch);
+float GetInternalHeaterVoltage(int ch);
