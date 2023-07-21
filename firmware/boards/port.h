@@ -9,11 +9,12 @@ struct AnalogResult
     struct {
         float NernstVoltage;
         float PumpCurrentVoltage;
-        /* for dual version - this is voltage on Heater-, switches between zero and Vbatt with heater PWM,
-         * used for both Vbatt measurement and Heater diagnostic */
-        float BatteryVoltage;
+        /* for dual versions - this is voltage on Heater-, measured during heater is off
+         * used for both Heater supply voltage measurement and Heater/Heater switch diagnostic */
+        float HeaterSupplyVoltage;
     } ch[AFR_CHANNELS];
     float VirtualGroundVoltageInt;
+    /* TODO: add SupplyVoltage - some boards can measure supply voltage */
 };
 
 AnalogResult AnalogSample();

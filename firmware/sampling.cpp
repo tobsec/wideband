@@ -92,8 +92,8 @@ static void SamplingThread(void*)
                 (1 - PUMP_FILTER_ALPHA) * res.pumpCurrentSenseVoltage +
                 PUMP_FILTER_ALPHA * (result.ch[ch].PumpCurrentVoltage - result.VirtualGroundVoltageInt);
 
-            #ifdef BATTERY_INPUT_DIVIDER
-                res.internalHeaterVoltage = result.ch[ch].BatteryVoltage;
+            #ifdef HEATER_INPUT_DIVIDER
+                res.internalHeaterVoltage = result.ch[ch].HeaterSupplyVoltage;
             #endif
 
             // Shift history over by one

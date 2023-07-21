@@ -65,7 +65,7 @@ static const PWMConfig heaterPwmConfig = {
 };
 
 static constexpr int preheatTimeCounter = HEATER_PREHEAT_TIME / HEATER_CONTROL_PERIOD;
-static constexpr int batteryStabTimeCounter = HEATER_BATTERY_STAB_TIME / HEATER_CONTROL_PERIOD;
+static constexpr int heaterSupplyStabTimeCounter = HEATER_SUPPLY_STAB_TIME / HEATER_CONTROL_PERIOD;
 static constexpr int closedLoopStabTimeCounter = HEATER_CLOSED_LOOP_STAB_TIME / HEATER_CONTROL_PERIOD;
 static constexpr int heaterWarmUpTimeCounter = HEATER_WARMUP_TIMEOUT / HEATER_CONTROL_PERIOD;
 // Retry timeouts
@@ -100,7 +100,7 @@ static struct heater_state state[AFR_CHANNELS] =
             HEATER_CONTROL_PERIOD
         ),
         .timeCounter = preheatTimeCounter,
-        .batteryStabTime = batteryStabTimeCounter,
+        .batteryStabTime = heaterSupplyStabTimeCounter,
         .rampVoltage = 0,
         .heaterState = HeaterState::Preheat,
         .ch = 0,
@@ -116,7 +116,7 @@ static struct heater_state state[AFR_CHANNELS] =
             HEATER_CONTROL_PERIOD
         ),
         .timeCounter = preheatTimeCounter,
-        .batteryStabTime = batteryStabTimeCounter,
+        .batteryStabTime = heaterSupplyStabTimeCounter,
         .rampVoltage = 0,
         .heaterState = HeaterState::Preheat,
         .ch = 1,
@@ -125,7 +125,7 @@ static struct heater_state state[AFR_CHANNELS] =
 #endif
 };
 
-static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowState, float batteryVoltage, float sensorTemp)
+static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowState, float heaterSupplyVoltage, float sensorTemp)
 {
     bool heaterAllowed = heaterAllowState == HeaterAllow::Allowed;
 
@@ -133,9 +133,9 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
     if (heaterAllowState == HeaterAllow::Unknown)
     {
         // measured voltage too low to auto-start heating
-        if (batteryVoltage < HEATER_BATTETY_OFF_VOLTAGE)
+        if (heaterSupplyVoltage < HEATER_SUPPLY_OFF_VOLTAGE)
         {
-            s.batteryStabTime = batteryStabTimeCounter;
+            s.batteryStabTime = heaterSupplyStabTimeCounter;
 
             // set fault
             SetFault(s.ch, Fault::SensorNoHeatSupply);
@@ -143,7 +143,7 @@ static HeaterState GetNextState(struct heater_state &s, HeaterAllow heaterAllowS
             return HeaterState::NoHeaterSupply;
         }
         // measured voltage is high enougth to auto-start heating, wait some time to stabilize
-        if ((batteryVoltage > HEATER_BATTERY_ON_VOLTAGE) && (s.batteryStabTime > 0))
+        if ((heaterSupplyVoltage > HEATER_SUPPLY_ON_VOLTAGE) && (s.batteryStabTime > 0))
         {
             s.batteryStabTime--;
         }
@@ -311,12 +311,12 @@ static void HeaterThread(void*)
 
             // If we haven't heard from rusEFI, use the internally sensed 
             // battery voltage instead of voltage over CAN.
-            float batteryVoltage = heaterAllowState == HeaterAllow::Unknown
+            float heaterSupplyVoltage = heaterAllowState == HeaterAllow::Unknown
                                         ? GetInternalHeaterVoltage(s.ch)
                                         : GetRemoteBatteryVoltage();
 
             // Run the state machine
-            s.heaterState = GetNextState(s, heaterAllowState, batteryVoltage, sensorTemperature);
+            s.heaterState = GetNextState(s, heaterAllowState, heaterSupplyVoltage, sensorTemperature);
             float heaterVoltage = GetVoltageForState(s, heaterEsr);
 
             // Limit to 11 volts
@@ -325,7 +325,7 @@ static void HeaterThread(void*)
             }
 
             // duty = (V_eff / V_batt) ^ 2
-            float voltageRatio = heaterVoltage / batteryVoltage;
+            float voltageRatio = heaterVoltage / heaterSupplyVoltage;
             float duty = voltageRatio * voltageRatio;
 
             #ifdef HEATER_MAX_DUTY
@@ -338,7 +338,7 @@ static void HeaterThread(void*)
             }
             #endif
 
-            if (batteryVoltage >= 23)
+            if (heaterSupplyVoltage >= 23)
             {
                 duty = 0;
                 heaterVoltage = 0;
