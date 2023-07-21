@@ -48,7 +48,7 @@
 #define HEATER_OVERHEAT_RETRY_TIMEOUT 60000
 #define HEATER_UNDERHEAT_RETRY_TIMEOUT 30000
 
-#define HEATER_SUPPLY_STAB_TIME 3000
+#define HEATER_SUPPLY_STAB_TIME 500
 // minimal heater voltage to start heating without CAN command
 #define HEATER_SUPPLY_ON_VOLTAGE 9.5
 // mininal heater voltage to continue heating
