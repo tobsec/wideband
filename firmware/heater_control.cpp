@@ -309,11 +309,13 @@ static void HeaterThread(void*)
             float heaterEsr = GetSensorInternalResistance(s.ch);
             float sensorTemperature = GetSensorTemperature(s.ch);
 
-            // If we haven't heard from rusEFI, use the internally sensed 
-            // battery voltage instead of voltage over CAN.
-            float heaterSupplyVoltage = heaterAllowState == HeaterAllow::Unknown
-                                        ? GetInternalHeaterVoltage(s.ch)
-                                        : GetRemoteBatteryVoltage();
+            #ifdef HEATER_INPUT_DIVIDER
+                // if board has ability to measure heater supply localy - use it
+                float heaterSupplyVoltage = GetInternalHeaterVoltage(s.ch);
+            #else
+                // this board rely on measured voltage from ECU
+                float heaterSupplyVoltage = GetRemoteBatteryVoltage();
+            #endif
 
             // Run the state machine
             s.heaterState = GetNextState(s, heaterAllowState, heaterSupplyVoltage, sensorTemperature);
