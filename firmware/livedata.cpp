@@ -24,7 +24,7 @@ void SamplingUpdateLiveData()
         const auto& sampler = GetSampler(ch);
         const auto& heater = GetHeaterController(ch);
 
-        float voltage = sampler.GetInternalBatteryVoltage();
+        float voltage = sampler.GetInternalHeaterVoltage();
 
         data->lambda = GetLambda(ch);
         data->temperature = sampler.GetSensorTemperature() * 10;
