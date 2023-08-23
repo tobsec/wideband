@@ -237,7 +237,8 @@ static void handleIoTestCommand(TsChannelBase* tsChannel, ts_response_format_e m
 }
 
 static bool isKnownCommand(char command) {
-	return command == TS_HELLO_COMMAND || command == TS_READ_COMMAND || command == TS_OUTPUT_COMMAND
+	return command == TS_HELLO_COMMAND
+			|| command == TS_READ_COMMAND
 			|| command == TS_BURN_COMMAND
 			|| command == TS_CHUNK_WRITE_COMMAND
 			|| command == TS_GET_SCATTERED_GET_COMMAND
@@ -302,13 +303,13 @@ bool TunerStudio::handlePlainCommand(TsChannelBase* tsChannel, uint8_t command) 
 		//efiPrintf("Got naked Query command");
 		handleQueryCommand(tsChannel, TS_PLAIN);
 		return true;
-	} else if (command == TS_TEST_COMMAND || command == 'T') {
+	} else if (command == TS_TEST_COMMAND || command == TS_TEST_COMMAND2) {
 		handleTestCommand(tsChannel);
 		return true;
 	} else if (command == TS_COMMAND_F) {
 		/**
 		 * http://www.msextra.com/forums/viewtopic.php?f=122&t=48327
-		 * Response from TS support: This is an optional command		 *
+		 * Response from TS support: This is an optional command
 		 * "The F command is used to find what ini. file needs to be loaded in TunerStudio to match the controller.
 		 * If you are able to just make your firmware ignore the command that would work.
 		 * Currently on some firmware versions the F command is not used and is just ignored by the firmware as a unknown command."
@@ -350,6 +351,7 @@ static int tsProcessOne(TsChannelBase* tsChannel) {
 		return -1;
 	}
 
+	/* TODO: check for tsChannel type, CAN does not support Plain commands */
 	if (tsInstance.handlePlainCommand(tsChannel, firstByte)) {
 		return -1;
 	}
@@ -525,7 +527,7 @@ int TunerStudio::handleCrcCommand(TsChannelBase* tsChannel, char *data, size_t i
 		break;
 	case TS_TEST_COMMAND:
 		[[fallthrough]];
-	case 'T':
+	case TS_TEST_COMMAND2:
 		handleTestCommand(tsChannel);
 		break;
 	default:
@@ -563,12 +565,12 @@ int TunerStudio::handleCrcCommand(TsChannelBase* tsChannel, char *data, size_t i
 	} else {
 		const TunerStudioDataPacketHeader* header = reinterpret_cast<TunerStudioDataPacketHeader*>(data);
 
+		/* TODO: check for incoming packet canId equal to our CanId
+		 * continue if equal, otherwise
+		 * TODO: implement CAN passthrough */
+
 		switch(command)
 		{
-		case TS_OUTPUT_COMMAND:
-			tsState.outputChannelsCommandCounter++;
-			cmdOutputChannels(tsChannel, header->offset, header->count);
-			break;
 		case TS_CHUNK_WRITE_COMMAND:
 			if (header->page == 0)
 				handleWriteChunkCommand(tsChannel, TS_CRC, header->offset, header->count, data + sizeof(TunerStudioDataPacketHeader));
@@ -582,10 +584,14 @@ int TunerStudio::handleCrcCommand(TsChannelBase* tsChannel, char *data, size_t i
 				handleScatterListCrc32Check(tsChannel, header->offset, header->count);
 			break;
 		case TS_READ_COMMAND:
-			if (header->page == 0)
+			if (header->page == 7) {
+				tsState.outputChannelsCommandCounter++;
+				cmdOutputChannels(tsChannel, header->offset, header->count);
+			} else if (header->page == 0) {
 				handlePageReadCommand(tsChannel, TS_CRC, header->offset, header->count);
-			else
+			} else if (header->page == 1) {
 				handleScatterListReadCommand(tsChannel, header->offset, header->count);
+			}
 			break;
 		default:
 			sendErrorCode(tsChannel, TS_RESPONSE_UNRECOGNIZED_COMMAND);

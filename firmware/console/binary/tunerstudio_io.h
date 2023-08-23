@@ -16,19 +16,28 @@
 /* TODO: find better place */
 #define BLOCKING_FACTOR 256
 
-#define TS_BURN_COMMAND 'B'
-#define TS_CHUNK_WRITE_COMMAND 'C'
-#define TS_COMMAND_F 'F'
+/* Commands defined in ini file, please keep in sync with ini file! */
+#define TS_BURN_COMMAND 'b'
 #define TS_CRC_CHECK_COMMAND 'k'
+/* used for both config and livedata reading, lovedata (realtime data )is located on page 7 as per MS documentation */
+#define TS_READ_COMMAND 'r'
+#define TS_GET_SCATTERED_GET_COMMAND 'g'
+/* TODO: make compatible with MS */
+#define TS_IO_TEST_COMMAND 'Z'
+
+/* currently not used in ini file but implemneted in FW */
+#define TS_CHUNK_WRITE_COMMAND 'C'
 #define TS_GET_FIRMWARE_VERSION 'V'
 #define TS_HELLO_COMMAND 'S'
-#define TS_OUTPUT_COMMAND 'O'
-#define TS_PROTOCOL "001"
 #define TS_QUERY_COMMAND 'Q'
-#define TS_READ_COMMAND 'R'
 #define TS_TEST_COMMAND 't'
-#define TS_GET_SCATTERED_GET_COMMAND '9'
-#define TS_IO_TEST_COMMAND 'Z'
+#define TS_TEST_COMMAND2 'T'
+
+/* The F command is used to find what ini. file needs to be loaded in TunerStudio to match the controller */
+#define TS_COMMAND_F 'F'
+
+/* Protocol version */
+#define TS_PROTOCOL "001"
 
 #define TS_RESPONSE_BURN_OK 4
 #define TS_RESPONSE_COMMAND_OK 7
