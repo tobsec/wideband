@@ -168,6 +168,7 @@ ifneq ($(ENABLE_TS),)
 CPPSRC += console/binary/tunerstudio.cpp \
           console/binary/tunerstudio_io.cpp \
           console/binary/tunerstudio_io_serial.cpp \
+          console/binary/tunerstudio_io_can_ms_passthrough.cpp \
           console/binary/tunerstudio_commands.cpp \
           livedata.cpp \
 

@@ -145,6 +145,9 @@ protected:
 };
 #endif // HAL_USE_UART
 
+/* MegaSquirt passthrough */
+int MS_on_can_message(CANRxFrame *rx);
+
 #define CRC_VALUE_SIZE 4
 // todo: double-check this
 #define CRC_WRAPPING_SIZE (CRC_VALUE_SIZE + 3)

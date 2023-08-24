@@ -102,7 +102,11 @@ void SetConfiguration();
 uint8_t *GetConfigurationPtr();
 size_t GetConfigurationSize();
 int SaveConfiguration();
+
 const char *getTsSignature();
+int getTsSignatureSize();
+const char *getTsVersion();
+int getTsVersionSize();
 
 void rebootNow();
 void rebootToOpenblt();

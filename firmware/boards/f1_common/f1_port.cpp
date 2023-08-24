@@ -146,8 +146,26 @@ size_t GetConfigurationSize()
     return sizeof(cfg);
 }
 
+/* NOTE: size should be equal to last byte of queryCommand in ini file */
+static const char TsSignatureString[32] = TS_SIGNATURE;
+
 const char *getTsSignature() {
-    return TS_SIGNATURE;
+    return TsSignatureString;
+}
+
+int getTsSignatureSize() {
+    return sizeof(TsSignatureString);
+}
+
+/* NOTE: size should be equal to last byte of versionInfo in ini file */
+static const char TsVersionString[60] = TS_SIGNATURE ". Developed by RusEFI";
+
+const char *getTsVersion() {
+    return TsVersionString;
+}
+
+int getTsVersionSize() {
+    return sizeof(TsVersionString);
 }
 
 SensorType GetSensorType()

@@ -10,6 +10,8 @@
 #include "port.h"
 #include "max3185x.h"
 
+#include "tunerstudio_io.h"
+
 // this same header is imported by rusEFI to get struct layouts and firmware version
 #include "../for_rusefi/wideband_can.h"
 
@@ -72,6 +74,9 @@ void CanRxThread(void*)
         {
             continue;
         }
+
+        /* MS 29bit CAN protocol */
+        MS_on_can_message(&frame);
 
         if (frame.DLC == 2 && frame.EID == WB_MGS_ECU_STATUS) {
             // This is status from ECU - battery voltage and heater enable signal
