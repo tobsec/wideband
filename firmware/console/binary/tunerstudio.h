@@ -26,6 +26,7 @@ void tunerStudioDebug(TsChannelBase* tsChannel, const char *msg);
 void tunerStudioError(TsChannelBase* tsChannel, const char *msg);
 
 uint8_t* getWorkingPageAddr();
+size_t getTunerStudioPageSize();
 
 void startTunerStudioConnectivity(void);
 

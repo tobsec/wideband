@@ -108,6 +108,10 @@ uint8_t* getWorkingPageAddr() {
 	return GetConfigurationPtr();
 }
 
+size_t getTunerStudioPageSize() {
+	return GetConfigurationSize();
+}
+
 void sendOkResponse(TsChannelBase *tsChannel, ts_response_format_e mode) {
 	tsChannel->sendResponse(mode, NULL, 0);
 }
@@ -118,10 +122,6 @@ void sendErrorCode(TsChannelBase *tsChannel, uint8_t code) {
 
 void TunerStudio::sendErrorCode(TsChannelBase* tsChannel, uint8_t code) {
 	::sendErrorCode(tsChannel, code);
-}
-
-size_t getTunerStudioPageSize() {
-	return GetConfigurationSize();
 }
 
 // Validate whether the specified offset and count would cause an overrun in the tune.
