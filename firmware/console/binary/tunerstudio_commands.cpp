@@ -2,6 +2,7 @@
 #include "tunerstudio.h"
 #include "tunerstudio_io.h"
 #include "byteswap.h"
+#include "livedata.h"
 
 /* configuration */
 #include "port.h"
@@ -13,8 +14,6 @@
 
 void sendErrorCode(TsChannelBase *tsChannel, uint8_t code);
 void sendOkResponse(TsChannelBase *tsChannel, ts_response_format_e mode);
-
-FragmentList getFragments();
 
 /**
  * @brief 'Output' command sends out a snapshot of current values

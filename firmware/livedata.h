@@ -41,3 +41,6 @@ struct livedata_afr_s {
 
 /* update functions */
 void SamplingUpdateLiveData();
+
+/* get function */
+FragmentList getFragments();
