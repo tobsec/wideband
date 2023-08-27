@@ -27,15 +27,17 @@ void SamplingUpdateLiveData()
         float voltage = sampler.GetInternalHeaterVoltage();
 
         data->lambda = GetLambda(ch);
-        data->temperature = sampler.GetSensorTemperature() * 10;
-        data->heaterSupplyVoltage = voltage * 100;
-        data->nernstDc = sampler.GetNernstDc() * 1000;
-        data->nernstV = (int16_t)(sampler.GetNernstV() * 1000.0);
-        data->nernstAc = sampler.GetNernstAc() * 1000;
+        data->temperature = sampler.GetSensorTemperature();
+        data->heaterSupplyVoltage = voltage;
+        data->nernstDc = sampler.GetNernstDc();
+        data->nernstV = sampler.GetNernstV();
+        data->nernstAc = sampler.GetNernstAc();
+        /* in mA, not A */
         data->pumpCurrentTarget = GetPumpCurrent(ch);
+        /* in mA, not A */
         data->pumpCurrentMeasured = sampler.GetPumpNominalCurrent();
-        data->heaterDuty = GetHeaterDuty(ch) * 1000;    // 0.1 %
-        data->heaterEffectiveVoltage = heater.GetHeaterEffectiveVoltage() * 100;
+        data->heaterDuty = GetHeaterDuty(ch) * 100.0;
+        data->heaterEffectiveVoltage = heater.GetHeaterEffectiveVoltage();
         data->esr = sampler.GetSensorInternalResistance();
         data->fault = (uint8_t)GetCurrentFault(ch);
         data->heaterState = (uint8_t)GetHeaterState(ch);

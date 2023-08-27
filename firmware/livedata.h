@@ -6,38 +6,37 @@
 
 #include "wideband_config.h"
 
-/* +0 offset */
-struct livedata_common_s {
-	union {
-		struct {
-			float vbatt;
-		};
-		uint8_t pad0[32];
-	};
-};
+#include "efi_scaled_channel.h"
 
-/* +32 offset */
-struct livedata_afr_s {
-	union {
-		struct {
-			// lambda also displayed by TS as AFR, same data with different scale factor
-			float lambda;
-			uint16_t temperature;
-			uint16_t heaterSupplyVoltage;
-			uint16_t nernstDc;
-			uint16_t nernstAc;
-			float pumpCurrentTarget;
-			float pumpCurrentMeasured;
-			uint16_t heaterDuty;
-			uint16_t heaterEffectiveVoltage;
-			uint16_t esr;
-			int16_t nernstV;
-			uint8_t fault; // See wbo::Fault
-			uint8_t heaterState;
-		} __attribute__((packed));
-		uint8_t pad[32];
-	};
+/* +0 offset, size 32 bytes */
+struct livedata_common_s {
+	scaled_voltage vbatt;
+	uint8_t pad0[30];
 };
+static_assert(sizeof(livedata_common_s) == 32);
+
+/* +32 offset, size 32 bytes */
+struct livedata_afr_s {
+	// lambda also displayed by TS as AFR, same data with different scale factor
+	scaled_lambda lambda;
+	uint8_t pad0[2];
+	scaled_high_temperature temperature;
+	scaled_voltage heaterSupplyVoltage;
+	scaled_voltage nernstDc;
+	scaled_voltage nernstAc;
+	scaled_current_signed pumpCurrentTarget;
+	uint8_t pad1[2];
+	scaled_current_signed pumpCurrentMeasured;
+	uint8_t pad2[2];
+	scaled_percent heaterDuty;
+	scaled_voltage heaterEffectiveVoltage;
+	uint16_t esr;
+	scaled_voltage_signed nernstV;
+	uint8_t fault; // See wbo::Fault
+	uint8_t heaterState;
+	uint8_t pad3[2];
+};
+static_assert(sizeof(livedata_afr_s) == 32);
 
 /* update functions */
 void SamplingUpdateLiveData();

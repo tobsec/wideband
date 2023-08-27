@@ -146,8 +146,8 @@ int Max3185x::readPacket31855()
 	}
 
 	if (ret) {
-		coldJunctionTemperature = NAN;
-		livedata.coldJunctionTemperature = 0;
+		coldJunctionTemperature = 0.0;
+		livedata.coldJunctionTemperature = 0.0;
 		temperature = NAN;
 		livedata.temperature = 0;
 	} else {

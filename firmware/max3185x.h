@@ -5,6 +5,8 @@
 #include "wideband_config.h"
 #include "thread_controller.h"
 
+#include "efi_scaled_channel.h"
+
 typedef enum {
 	UNKNOWN_TYPE = 0,
 	MAX31855_TYPE = 1,
@@ -21,15 +23,14 @@ typedef enum {
 
 /* livedata: +96/112 offset, size = 16 */
 struct livedata_egt_s {
-	union {
-		struct {
-			float temperature;
-			float coldJunctionTemperature;
-			uint8_t state;
-		} __attribute__((packed));
-		uint8_t pad[16];
-	};
+	scaled_high_temperature temperature;
+	uint8_t pad0[2];
+	scaled_high_temperature coldJunctionTemperature;
+	uint8_t pad1[2];
+	uint8_t state;
+	uint8_t pad2[7];
 };
+static_assert(sizeof(livedata_egt_s) == 16);
 
 // for all board. in case of no EGT - returns NULL
 const struct livedata_egt_s * getEgtLiveDataStructAddr(const int ch);
