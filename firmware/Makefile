@@ -242,6 +242,9 @@ ifeq ($(USE_OPENBLT),yes)
   DDEFS += -DUSE_OPENBLT=TRUE
 endif
 
+# List all user libraries here
+ULIBS += -lm
+
 #
 # End of user section
 ##############################################################################
