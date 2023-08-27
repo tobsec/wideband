@@ -572,10 +572,15 @@ int TunerStudio::handleCrcCommand(TsChannelBase* tsChannel, char *data, size_t i
 		switch(command)
 		{
 		case TS_CHUNK_WRITE_COMMAND:
-			if (header->page == 0)
+			if (header->page == 0) {
 				handleWriteChunkCommand(tsChannel, TS_CRC, header->offset, header->count, data + sizeof(TunerStudioDataPacketHeader));
-			else
+			} else if (header->page == 1) {
 				handleScatterListWriteCommand(tsChannel, header->offset, header->count, data + sizeof(TunerStudioDataPacketHeader));
+			} else {
+				sendErrorCode(tsChannel, TS_RESPONSE_OUT_OF_RANGE);
+				tunerStudioError(tsChannel, "ERROR: attemp to write to RO or not exist page");
+				return false;
+			}
 			break;
 		case TS_CRC_CHECK_COMMAND:
 			if (header->page == 0)
@@ -591,6 +596,28 @@ int TunerStudio::handleCrcCommand(TsChannelBase* tsChannel, char *data, size_t i
 				handlePageReadCommand(tsChannel, TS_CRC, header->offset, header->count);
 			} else if (header->page == 1) {
 				handleScatterListReadCommand(tsChannel, header->offset, header->count);
+			} else if (header->page == 14) {
+				/* see versionInfo in ini file
+				 * table 14 is used for Version and Copyright string (same as on MS) */
+				if (header->offset + header->count > getTsVersionSize()) {
+					sendErrorCode(tsChannel, TS_RESPONSE_OUT_OF_RANGE);
+					return false;
+				}
+				const uint8_t* addr = (uint8_t*)getTsVersion() + header->offset;
+				tsChannel->sendResponse(TS_CRC, addr, header->count);
+			} else if (header->page == 15) {
+				/* see queryCommand in ini file
+				 * table 15 is used for Signature (same as on MS) */
+				if (header->offset + header->count > getTsSignatureSize()) {
+					sendErrorCode(tsChannel, TS_RESPONSE_OUT_OF_RANGE);
+					return false;
+				}
+				const uint8_t* addr = (uint8_t*)getTsSignature() + header->offset;
+				tsChannel->sendResponse(TS_CRC, addr, header->count);
+			} else {
+				sendErrorCode(tsChannel, TS_RESPONSE_OUT_OF_RANGE);
+				tunerStudioError(tsChannel, "ERROR: attemp to read not exist page");
+				return false;
 			}
 			break;
 		default:
