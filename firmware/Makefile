@@ -231,6 +231,9 @@ ifeq ($(USE_OPENBLT),yes)
   CSRC += boards/f1_common/openblt/shared_params.c
 endif
 
+# List all user libraries here
+ULIBS += -lm
+
 #
 # End of user section
 ##############################################################################
