@@ -27,6 +27,7 @@ void tunerStudioError(TsChannelBase* tsChannel, const char *msg);
 
 uint8_t* getWorkingPageAddr();
 size_t getTunerStudioPageSize();
+bool validateOffsetCount(size_t offset, size_t count);
 
 void startTunerStudioConnectivity(void);
 
