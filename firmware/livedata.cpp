@@ -19,19 +19,21 @@ void SamplingUpdateLiveData()
     float vbat = 0;
     for (int ch = 0; ch < AFR_CHANNELS; ch++)
     {
-        volatile struct livedata_afr_s *data = &livedata_afr[ch];
+        /* volatile */ struct livedata_afr_s *data = &livedata_afr[ch];
         float voltage = GetInternalHeaterVoltage(ch);
 
         data->lambda = GetLambda(ch);
-        data->temperature = GetSensorTemperature(ch) * 10;
-        data->heaterSupplyVoltage = voltage * 100;
-        data->nernstDc = GetNernstDc(ch) * 1000;
-        data->nernstV = (int16_t)(GetNernstV(ch) * 1000.0);
-        data->nernstAc = GetNernstAc(ch) * 1000;
+        data->temperature = GetSensorTemperature(ch);
+        data->heaterSupplyVoltage = voltage;
+        data->nernstDc = GetNernstDc(ch);
+        data->nernstV = GetNernstV(ch);
+        data->nernstAc = GetNernstAc(ch);
+        /* in mA, not A */
         data->pumpCurrentTarget = GetPumpCurrent(ch);
+        /* in mA, not A */
         data->pumpCurrentMeasured = GetPumpNominalCurrent(ch);
-        data->heaterDuty = GetHeaterDuty(ch) * 1000;    // 0.1 %
-        data->heaterEffectiveVoltage = GetHeaterEffVoltage(ch) * 100;
+        data->heaterDuty = GetHeaterDuty(ch) * 100.0;
+        data->heaterEffectiveVoltage = GetHeaterEffVoltage(ch);
         data->esr = GetSensorInternalResistance(ch);
         data->fault = (uint8_t)GetCurrentFault(ch);
         data->heaterState = (uint8_t)GetHeaterState(ch);
