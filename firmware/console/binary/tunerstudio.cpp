@@ -365,6 +365,7 @@ static int tsProcessOne(TsChannelBase* tsChannel) {
 		return -1;
 	}
 
+	// big-endian protocol!
 	uint16_t incomingPacketSize = firstByte << 8 | secondByte;
 
 	if (incomingPacketSize == 0 || incomingPacketSize > (sizeof(tsChannel->scratchBuffer) - CRC_WRAPPING_SIZE)) {
@@ -564,6 +565,9 @@ int TunerStudio::handleCrcCommand(TsChannelBase* tsChannel, char *data, size_t i
 		return false;
 	} else {
 		const TunerStudioDataPacketHeader* header = reinterpret_cast<TunerStudioDataPacketHeader*>(data);
+		/* convert from big-endian */
+		uint16_t offset = SWAP_UINT16(header->offset);
+		uint16_t count = SWAP_UINT16(header->count);
 
 		/* TODO: check for incoming packet canId equal to our CanId
 		 * continue if equal, otherwise
@@ -573,9 +577,9 @@ int TunerStudio::handleCrcCommand(TsChannelBase* tsChannel, char *data, size_t i
 		{
 		case TS_CHUNK_WRITE_COMMAND:
 			if (header->page == 0) {
-				handleWriteChunkCommand(tsChannel, TS_CRC, header->offset, header->count, data + sizeof(TunerStudioDataPacketHeader));
+				handleWriteChunkCommand(tsChannel, TS_CRC, offset, count, data + sizeof(TunerStudioDataPacketHeader));
 			} else if (header->page == 1) {
-				handleScatterListWriteCommand(tsChannel, header->offset, header->count, data + sizeof(TunerStudioDataPacketHeader));
+				handleScatterListWriteCommand(tsChannel, offset, count, data + sizeof(TunerStudioDataPacketHeader));
 			} else {
 				sendErrorCode(tsChannel, TS_RESPONSE_OUT_OF_RANGE);
 				tunerStudioError(tsChannel, "ERROR: attemp to write to RO or not exist page");
@@ -584,36 +588,36 @@ int TunerStudio::handleCrcCommand(TsChannelBase* tsChannel, char *data, size_t i
 			break;
 		case TS_CRC_CHECK_COMMAND:
 			if (header->page == 0)
-				handleCrc32Check(tsChannel, TS_CRC, header->offset, header->count);
+				handleCrc32Check(tsChannel, TS_CRC, offset, count);
 			else
-				handleScatterListCrc32Check(tsChannel, header->offset, header->count);
+				handleScatterListCrc32Check(tsChannel, offset, count);
 			break;
 		case TS_READ_COMMAND:
 			if (header->page == 7) {
 				tsState.outputChannelsCommandCounter++;
-				cmdOutputChannels(tsChannel, header->offset, header->count);
+				cmdOutputChannels(tsChannel, offset, count);
 			} else if (header->page == 0) {
-				handlePageReadCommand(tsChannel, TS_CRC, header->offset, header->count);
+				handlePageReadCommand(tsChannel, TS_CRC, offset, count);
 			} else if (header->page == 1) {
-				handleScatterListReadCommand(tsChannel, header->offset, header->count);
+				handleScatterListReadCommand(tsChannel, offset, count);
 			} else if (header->page == 14) {
 				/* see versionInfo in ini file
 				 * table 14 is used for Version and Copyright string (same as on MS) */
-				if (header->offset + header->count > getTsVersionSize()) {
+				if (offset + count > getTsVersionSize()) {
 					sendErrorCode(tsChannel, TS_RESPONSE_OUT_OF_RANGE);
 					return false;
 				}
-				const uint8_t* addr = (uint8_t*)getTsVersion() + header->offset;
-				tsChannel->sendResponse(TS_CRC, addr, header->count);
+				const uint8_t* addr = (uint8_t*)getTsVersion() + offset;
+				tsChannel->sendResponse(TS_CRC, addr, count);
 			} else if (header->page == 15) {
 				/* see queryCommand in ini file
 				 * table 15 is used for Signature (same as on MS) */
-				if (header->offset + header->count > getTsSignatureSize()) {
+				if (offset + count > getTsSignatureSize()) {
 					sendErrorCode(tsChannel, TS_RESPONSE_OUT_OF_RANGE);
 					return false;
 				}
-				const uint8_t* addr = (uint8_t*)getTsSignature() + header->offset;
-				tsChannel->sendResponse(TS_CRC, addr, header->count);
+				const uint8_t* addr = (uint8_t*)getTsSignature() + offset;
+				tsChannel->sendResponse(TS_CRC, addr, count);
 			} else {
 				sendErrorCode(tsChannel, TS_RESPONSE_OUT_OF_RANGE);
 				tunerStudioError(tsChannel, "ERROR: attemp to read not exist page");
