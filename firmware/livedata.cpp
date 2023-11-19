@@ -19,7 +19,7 @@ void SamplingUpdateLiveData()
     float vbat = 0;
     for (int ch = 0; ch < AFR_CHANNELS; ch++)
     {
-        volatile struct livedata_afr_s *data = &livedata_afr[ch];
+        struct livedata_afr_s *data = &livedata_afr[ch];
 
         const auto& sampler = GetSampler(ch);
         const auto& heater = GetHeaterController(ch);
