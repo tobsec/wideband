@@ -24,3 +24,4 @@ float GetRemoteBatteryVoltage();
 // implement this for your board if you want some non-standard behavior
 // default implementation simply calls SendRusefiFormat
 void SendCanForChannel(uint8_t ch);
+void SendCanEgtForChannel(uint8_t ch);
