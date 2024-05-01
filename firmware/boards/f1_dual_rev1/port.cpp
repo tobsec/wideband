@@ -164,6 +164,8 @@ void SetupESRDriver(SensorType sensor)
             /* enable LSU4.2 */
             palSetPadMode(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN,
                 PAL_MODE_OUTPUT_PUSHPULL);
+            /* enable output of buffer */
+            palSetPad(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN);
         break;
         case SensorType::LSU49:
             /* disable all others ESR drivers */
@@ -178,6 +180,8 @@ void SetupESRDriver(SensorType sensor)
             palSetPadMode(NERNST_49_BIAS_PORT, NERNST_49_BIAS_PIN,
                 PAL_MODE_OUTPUT_PUSHPULL);
             palSetPad(NERNST_49_BIAS_PORT, NERNST_49_BIAS_PIN);
+            /* enable output of buffer */
+            palSetPad(NERNST_49_BIAS_PORT, NERNST_49_BIAS_PIN);
         break;
         case SensorType::LSUADV:
             /* disable bias */
@@ -191,8 +195,13 @@ void SetupESRDriver(SensorType sensor)
             /* enable LSU4.2 */
             palSetPadMode(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN,
                 PAL_MODE_OUTPUT_PUSHPULL);
+            /* enable output of buffer */
+            palSetPad(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN);
         break;
     }
+
+    /* set ESR drive as output */
+    palSetPadMode(NERNST_ESR_DRIVER_PORT, NERNST_ESR_DRIVER_PIN, PAL_MODE_OUTPUT_PUSHPULL);
 }
 
 int GetESRSupplyR()

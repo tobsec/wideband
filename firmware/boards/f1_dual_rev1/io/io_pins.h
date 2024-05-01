@@ -26,6 +26,10 @@
 #define LL_CAN_TX_PIN				LL_GPIO_PIN_12
 #define LL_CAN_RX_PIN				LL_GPIO_PIN_11
 
+// Nernst drive pin
+#define NERNST_ESR_DRIVER_PORT      GPIOC
+#define NERNST_ESR_DRIVER_PIN       12
+
 // LSU 4.2 - 6.8K
 #define NERNST_42_ESR_DRIVER_PORT   GPIOB
 #define NERNST_42_ESR_DRIVER_PIN    12

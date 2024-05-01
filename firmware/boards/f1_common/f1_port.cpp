@@ -208,15 +208,5 @@ void checkDfuAndJump()
 
 void ToggleESRDriver(SensorType sensor)
 {
-    switch (sensor) {
-        case SensorType::LSU42:
-            palTogglePad(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN);
-        break;
-        case SensorType::LSU49:
-            palTogglePad(NERNST_49_ESR_DRIVER_PORT, NERNST_49_ESR_DRIVER_PIN);
-        break;
-        case SensorType::LSUADV:
-            palTogglePad(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN);
-        break;
-    }
+    palTogglePad(NERNST_ESR_DRIVER_PORT, NERNST_ESR_DRIVER_PIN);
 }
