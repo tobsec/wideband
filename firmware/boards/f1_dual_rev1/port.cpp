@@ -151,57 +151,53 @@ AnalogResult AnalogSample()
 /* TODO: optimize */
 void SetupESRDriver(SensorType sensor)
 {
+    /* set all buffer OE pins as output */
+    palSetPadMode(NERNST_49_ESR_DRIVER_PORT, NERNST_49_ESR_DRIVER_PIN,
+                PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPadMode(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN,
+                PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPadMode(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN,
+                PAL_MODE_OUTPUT_PUSHPULL);
+
+    /* set all buffer OE pins as low to configure buffer outputs as tri-state
+     * and enable only one output (according to selected sensor type) in the 
+     * following switch-case */
+    palClearPad(NERNST_49_ESR_DRIVER_PORT, NERNST_49_ESR_DRIVER_PIN);
+    palClearPad(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN);
+    palClearPad(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN);
+
+    /* set buffer schmitt-trigger input pin (D/A) as output and set level as low */
+    palSetPadMode(NERNST_ESR_DRIVER_PORT, NERNST_ESR_DRIVER_PIN,
+                PAL_MODE_OUTPUT_PUSHPULL);
+    palClearPad(NERNST_ESR_DRIVER_PORT, NERNST_ESR_DRIVER_PIN);
+    
     switch (sensor) {
         case SensorType::LSU42:
             /* disable bias */
             palSetPadMode(NERNST_49_BIAS_PORT, NERNST_49_BIAS_PIN,
                 PAL_MODE_INPUT);
-            /* disable all others ESR drivers */
-            palSetPadMode(NERNST_49_ESR_DRIVER_PORT, NERNST_49_ESR_DRIVER_PIN,
-                PAL_MODE_INPUT);
-            palSetPadMode(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN,
-                PAL_MODE_INPUT);
-            /* enable LSU4.2 */
-            palSetPadMode(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN,
-                PAL_MODE_OUTPUT_PUSHPULL);
-            /* enable output of buffer */
+
+            /* enable LSU4.2 output of buffer by setting OE pins as high */
             palSetPad(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN);
         break;
         case SensorType::LSU49:
-            /* disable all others ESR drivers */
-            palSetPadMode(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN,
-                PAL_MODE_INPUT);
-            palSetPadMode(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN,
-                PAL_MODE_INPUT);
-            /* enable LSU4.2 */
-            palSetPadMode(NERNST_49_ESR_DRIVER_PORT, NERNST_49_ESR_DRIVER_PIN,
-                PAL_MODE_OUTPUT_PUSHPULL);
             /* enable bias */
             palSetPadMode(NERNST_49_BIAS_PORT, NERNST_49_BIAS_PIN,
                 PAL_MODE_OUTPUT_PUSHPULL);
             palSetPad(NERNST_49_BIAS_PORT, NERNST_49_BIAS_PIN);
-            /* enable output of buffer */
-            palSetPad(NERNST_49_BIAS_PORT, NERNST_49_BIAS_PIN);
+
+            /* enable LSU4.9 output of buffer by setting OE pins as high */
+            palSetPad(NERNST_49_ESR_DRIVER_PORT, NERNST_49_ESR_DRIVER_PIN);
         break;
         case SensorType::LSUADV:
             /* disable bias */
             palSetPadMode(NERNST_49_BIAS_PORT, NERNST_49_BIAS_PIN,
                 PAL_MODE_INPUT);
-            /* disable all others ESR drivers */
-            palSetPadMode(NERNST_49_ESR_DRIVER_PORT, NERNST_49_ESR_DRIVER_PIN,
-                PAL_MODE_INPUT);
-            palSetPadMode(NERNST_42_ESR_DRIVER_PORT, NERNST_42_ESR_DRIVER_PIN,
-                PAL_MODE_INPUT);
-            /* enable LSU4.2 */
-            palSetPadMode(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN,
-                PAL_MODE_OUTPUT_PUSHPULL);
-            /* enable output of buffer */
+
+            /* enable LSU ADV output of buffer by setting OE pins as high */
             palSetPad(NERNST_ADV_ESR_DRIVER_PORT, NERNST_ADV_ESR_DRIVER_PIN);
         break;
     }
-
-    /* set ESR drive as output */
-    palSetPadMode(NERNST_ESR_DRIVER_PORT, NERNST_ESR_DRIVER_PIN, PAL_MODE_OUTPUT_PUSHPULL);
 }
 
 int GetESRSupplyR()
